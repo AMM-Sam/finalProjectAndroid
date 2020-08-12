@@ -27,6 +27,12 @@ public class FavoriteList extends AppCompatActivity implements   Adapter_omdb_ap
         search();
     }
 
+    @Override
+    protected void onResume() {
+        super.onResume();
+        search();
+    }
+
     public void search(){
         OmdbRepository database = new OmdbRepository(this, "OmdbV1", null, 1);
         OmdbClass dto_OmdbClass = database.getAllOmdbInformation_Favorite();
