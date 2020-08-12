@@ -52,9 +52,9 @@ public class FavoriteList extends AppCompatActivity implements   Adapter_omdb_ap
     public void searchDetail(String imdbID){
         OmdbRepository database = new OmdbRepository(this, "OmdbV1", null, 1);
         OmdbDetailClass dto_omdbDetailClass = database.GetRowOmdbInformation(imdbID);
-        if (dto_omdbDetailClass.getResponse().toUpperCase().equals("false".toUpperCase())){
-            Toast.makeText(FavoriteList.this, "مشکل", Toast.LENGTH_SHORT).show();
-        }
+//        if (dto_omdbDetailClass.getResponse().toUpperCase().equals("false".toUpperCase())){
+//            Toast.makeText(FavoriteList.this, "مشکل", Toast.LENGTH_SHORT).show();
+//        }
         fillAdapterDetail(dto_omdbDetailClass);
     }
 

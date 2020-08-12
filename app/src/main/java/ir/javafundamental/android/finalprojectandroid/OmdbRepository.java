@@ -123,14 +123,14 @@ public class OmdbRepository extends SQLiteOpenHelper {
     OmdbDetailClass GetRowOmdbInformation(String ImdbId)
     {
 
-        String GET_OmdbInformation_QUERY = "SELECT ImdbId FROM " + TABLE_NAME+ " Where ImdbId="+ "'" + ImdbId + "'";
+        String GET_OmdbInformation_QUERY = "SELECT Title,ImdbId,Year,Poster FROM " + TABLE_NAME+ " Where ImdbId="+ "'" + ImdbId + "'";
         OmdbDetailClass omdbDetailClass = new OmdbDetailClass();
 
         SQLiteDatabase db = this.getReadableDatabase();
         Cursor cursor = db.rawQuery(GET_OmdbInformation_QUERY, null);
 
         while (cursor.moveToNext()) {
-            if (ImdbId.equals(cursor.getString(0)))
+            if (ImdbId.equals(cursor.getString(1)))
             {
 
                     omdbDetailClass.setTitle(cursor.getString(0));
