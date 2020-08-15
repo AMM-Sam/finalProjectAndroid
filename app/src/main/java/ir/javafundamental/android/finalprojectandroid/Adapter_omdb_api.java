@@ -43,21 +43,30 @@ public class Adapter_omdb_api extends RecyclerView.Adapter<Adapter_omdb_api.View
     @Override
     public void onBindViewHolder(@NonNull Adapter_omdb_api.ViewHolder holder, int position) {
         Search dto_search = Data.get(position);
-        try {
+        try
+        {
             holder.txt_Title.setText(String.valueOf(dto_search.getTitle()));
             holder.txt_year.setText(String.valueOf(dto_search.getYear()));
             holder.txt_imdbID.setText(String.valueOf(dto_search.getImdbID()));
-            //holder.txt_rated.setText(String.valueOf(dto_search.getRated()));
-            try
-            {
-                Glide.with(this.mContext).load(dto_search.getPoster()).into(holder.img_poster);
+            holder.txt_type.setText(String.valueOf(dto_search.getType()));
+            Glide.with(this.mContext).load(dto_search.getPoster()).into(holder.img_poster);
+            holder.img_poster.setTag(dto_search.getPoster());
+
+            OmdbRepository database = new OmdbRepository(holder.btnSave.getContext(), "OmdbV3", null, 1);
+            if  (database.ExsitsFilm(dto_search.getImdbID())) {
+                holder.btnSave.setBackground(ContextCompat.getDrawable(holder.btnSave.getContext(), R.drawable.ic_save));
             }
-             catch (Exception ex){
-                 holder.img_poster.setBackground(ContextCompat.getDrawable(holder.img_poster.getContext(), R.drawable.ic_launcher_background));
+            else {
+                holder.btnSave.setBackground(ContextCompat.getDrawable(holder.btnSave.getContext(), R.drawable.ic_notsave));
             }
         }
-        catch (Exception ex){
-            String xxx = ex.getMessage();
+         catch (Exception ex){
+             holder.img_poster.setBackground(ContextCompat.getDrawable(holder.img_poster.getContext(), R.drawable.ic_no_image_available));
+             holder.txt_Title.setText(this.mContext.getString(R.string.error_for_connection));
+             holder.txt_year.setText(this.mContext.getString(R.string.error_for_connection));
+             holder.txt_imdbID.setText(this.mContext.getString(R.string.error_for_connection));
+             holder.txt_type.setText(this.mContext.getString(R.string.error_for_connection));
+             holder.img_poster.setTag("");
         }
     }
 
@@ -71,7 +80,9 @@ public class Adapter_omdb_api extends RecyclerView.Adapter<Adapter_omdb_api.View
         TextView txt_Title;
         TextView txt_year;
         TextView txt_imdbID;
+        TextView txt_type;
         Button btnMore;
+        Button btnSave;
         ImageView img_poster;
 
         ViewHolder(View itemView) {
@@ -79,14 +90,17 @@ public class Adapter_omdb_api extends RecyclerView.Adapter<Adapter_omdb_api.View
             txt_Title = itemView.findViewById(R.id.title);
             txt_year = itemView.findViewById(R.id.year);
             txt_imdbID = itemView.findViewById(R.id.imdbID);
+            txt_type = itemView.findViewById(R.id.type);
             img_poster = itemView.findViewById(R.id.imgShort);
             btnMore = itemView.findViewById(R.id.btnMore);
+            btnSave = itemView.findViewById(R.id.btnSave);
             btnMore.setOnClickListener(this);
+            btnSave.setOnClickListener(this);
         }
 
         @Override
         public void onClick(View view) {
-            if (mClickListener != null) mClickListener.onItemClick( txt_imdbID.getText().toString());
+            if (mClickListener != null) mClickListener.onItemClick(txt_imdbID.getText().toString(), view.getId(), view);
         }
     }
 
@@ -97,7 +111,7 @@ public class Adapter_omdb_api extends RecyclerView.Adapter<Adapter_omdb_api.View
 
     // parent activity will implement this method to respond to click events
     public interface ItemClickListener {
-        void onItemClick( String imdbID);
+        void onItemClick(String imdbID, Integer typeButton, View view);
     }
 
 }

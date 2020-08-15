@@ -1,5 +1,11 @@
 <resources>
-    <string name="app_name">finalProjectAndroid</string>
-    <!-- TODO: Remove or change this placeholder text -->
-    <string name="hello_blank_fragment">Hello blank fragment</string>
+    <string name="app_name">پروژه نهایی</string>
+    <string name="my_favorite_list">لیست منتخب من</string>
+    <string name="my_profile">پروفایل من</string>
+    <string name="error_for_connection">خطا در برقراری ارتباط</string>
+    <string name="plx_enter_movie_title">لطفا  عنوان  فیلم را وارد کنید</string>
+    <string name="error">خطا</string>
+    <string name="open">باز</string>
+    <string name="close">بسته</string>
+    <string name="no_items">هیچ گونه لیستی وجود ندارد</string>
 </resources>

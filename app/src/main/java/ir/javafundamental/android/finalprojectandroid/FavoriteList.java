@@ -1,11 +1,14 @@
 package ir.javafundamental.android.finalprojectandroid;
 
 import androidx.appcompat.app.AppCompatActivity;
+import androidx.core.content.ContextCompat;
+import androidx.recyclerview.widget.DividerItemDecoration;
 import androidx.recyclerview.widget.LinearLayoutManager;
 import androidx.recyclerview.widget.RecyclerView;
 
 import android.content.Intent;
 import android.os.Bundle;
+import android.view.View;
 import android.widget.Toast;
 
 import com.google.gson.Gson;
@@ -34,8 +37,11 @@ public class FavoriteList extends AppCompatActivity implements   Adapter_omdb_ap
     }
 
     public void search(){
-        OmdbRepository database = new OmdbRepository(this, "OmdbV1", null, 1);
+        OmdbRepository database = new OmdbRepository(this, "OmdbV3", null, 1);
         OmdbClass dto_OmdbClass = database.getAllOmdbInformation_Favorite();
+        if (dto_OmdbClass.getSearch().size() == 0){
+            Toast.makeText(FavoriteList.this, getString(R.string.no_items), Toast.LENGTH_SHORT).show();
+        }
         fillAdapter(dto_OmdbClass);
     }
 
@@ -48,15 +54,31 @@ public class FavoriteList extends AppCompatActivity implements   Adapter_omdb_ap
         Adapter_omdb_api adapterJson = new Adapter_omdb_api(dto_OmdbClass.getSearch(), FavoriteList.this);
         adapterJson.setClickListener(this);
         recyclerViewJson.setAdapter(adapterJson);
+        DividerItemDecoration dividerItemDecoration = new DividerItemDecoration(recyclerViewJson.getContext(), new LinearLayoutManager(this).getOrientation());
+        recyclerViewJson.addItemDecoration(dividerItemDecoration);
     }
 
     @Override
-    public void onItemClick(String imdbID) {
-        searchDetail(imdbID);
+    public void onItemClick(String imdbID, Integer typeButton, View view) {
+        if (typeButton == R.id.btnSave){
+            OmdbRepository database = new OmdbRepository(this, "OmdbV3", null, 1);
+            if  (database.ExsitsFilm(imdbID)) {
+                database.DeleteOmdbInformation(imdbID);
+                view.setBackground(ContextCompat.getDrawable(view.getContext(), R.drawable.ic_notsave));
+                search();
+            }
+            else {
+                database.insertOmdbInformation(imdbID);
+                view.setBackground(ContextCompat.getDrawable(view.getContext(), R.drawable.ic_save));
+            }
+        }
+        else {
+            searchDetail(imdbID);
+        }
     }
 
     public void searchDetail(String imdbID){
-        OmdbRepository database = new OmdbRepository(this, "OmdbV1", null, 1);
+        OmdbRepository database = new OmdbRepository(this, "OmdbV3", null, 1);
         OmdbDetailClass dto_omdbDetailClass = database.GetRowOmdbInformation(imdbID);
 //        if (dto_omdbDetailClass.getResponse().toUpperCase().equals("false".toUpperCase())){
 //            Toast.makeText(FavoriteList.this, "مشکل", Toast.LENGTH_SHORT).show();

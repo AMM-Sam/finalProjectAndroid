@@ -4,18 +4,28 @@ import android.content.Context;
 import android.database.Cursor;
 import android.database.sqlite.SQLiteDatabase;
 import android.database.sqlite.SQLiteOpenHelper;
+import android.widget.Toast;
 
 import androidx.annotation.Nullable;
+
+import com.google.gson.Gson;
+import com.google.gson.GsonBuilder;
+import com.loopj.android.http.AsyncHttpClient;
+import com.loopj.android.http.TextHttpResponseHandler;
 
 import java.util.ArrayList;
 import java.util.List;
 
+import cz.msebera.android.httpclient.Header;
+
 public class OmdbRepository extends SQLiteOpenHelper {
 
     String TABLE_NAME = "OmdbInformation";
+    private Context mycontext;
 
     public OmdbRepository(@Nullable Context context, @Nullable String name, @Nullable SQLiteDatabase.CursorFactory factory, int version) {
         super(context, name, factory, version);
+        mycontext = context;
     }
 
     @Override
@@ -25,7 +35,25 @@ public class OmdbRepository extends SQLiteOpenHelper {
                 "Title TEXT," +
                 "ImdbId Text," +
                 "Year TEXT," +
-                "Poster TEXT" +
+                "Poster TEXT," +
+                "Genre TEXT," +
+                "Runtime TEXT," +
+                "Actors TEXT," +
+                "imdbRating TEXT," +
+                "Released TEXT," +
+                "Awards TEXT," +
+                "Production TEXT," +
+                "Director TEXT," +
+                "Writer TEXT," +
+                "Language TEXT," +
+                "Website TEXT," +
+                "Rated TEXT," +
+                "Country TEXT," +
+                "Metascore TEXT," +
+                "imdbVotes TEXT," +
+                "Type TEXT," +
+                "DVD TEXT," +
+                "BoxOffice TEXT" +
                 ")";
         db.execSQL(CREATE_TABLE_QUERY);
     }
@@ -37,10 +65,96 @@ public class OmdbRepository extends SQLiteOpenHelper {
         // on upgrade
     }
 
-    public void insertOmdbInformation(String Title, String ImdbId, String Year, String Poster) {
-        String INSERT_OmdbInformation_QUERY = "INSERT INTO " + TABLE_NAME + "(Title,ImdbId,Year,Poster)" +
+    public void insertOmdbInformation(String ImdbId) {
+        AsyncHttpClient client = new AsyncHttpClient();
+        client.get("http://www.omdbapi.com/?i=" + ImdbId + "&apikey=79047db4",null, new TextHttpResponseHandler() {
+            @Override
+            public void onFailure(int statusCode, Header[] headers, String responseString, Throwable throwable) {
+                Toast.makeText(mycontext, mycontext.getString(R.string.error), Toast.LENGTH_SHORT).show();
+            }
+
+            @Override
+            public void onSuccess(int statusCode, Header[] headers, String responseString) {
+                GsonBuilder builder = new GsonBuilder();
+                builder.setPrettyPrinting();
+                Gson gson = builder.create();
+
+                OmdbDetailClass dto_OmdbClassDetail = gson.fromJson(responseString, OmdbDetailClass.class);
+                insert( dto_OmdbClassDetail.getTitle(),
+                        dto_OmdbClassDetail.getImdbID(),
+                        dto_OmdbClassDetail.getYear(),
+                        dto_OmdbClassDetail.getPoster(),
+                        dto_OmdbClassDetail.getGenre() == null ? "" : dto_OmdbClassDetail.getGenre(),
+                        dto_OmdbClassDetail.getRuntime() == null ? "" : dto_OmdbClassDetail.getRuntime(),
+                        dto_OmdbClassDetail.getActors() == null ? "" : dto_OmdbClassDetail.getActors(),
+                        dto_OmdbClassDetail.getImdbRating() == null ? "" : dto_OmdbClassDetail.getImdbRating(),
+                        dto_OmdbClassDetail.getReleased() == null ? "" : dto_OmdbClassDetail.getReleased(),
+                        dto_OmdbClassDetail.getAwards() == null ? "" : dto_OmdbClassDetail.getAwards(),
+                        dto_OmdbClassDetail.getProduction() == null ? "" : dto_OmdbClassDetail.getProduction(),
+                        dto_OmdbClassDetail.getDirector() == null ? "" : dto_OmdbClassDetail.getDirector(),
+                        dto_OmdbClassDetail.getWriter() == null ? "" : dto_OmdbClassDetail.getWriter().replace("\'", "\'\'")
+                                                                                                        .replace("\"", "\"\"")
+                                                                                                        .replace("`", "``")
+                                                                                                        .replace("\\", "\\\\"),
+                        dto_OmdbClassDetail.getLanguage() == null ? "" : dto_OmdbClassDetail.getLanguage(),
+                        dto_OmdbClassDetail.getWebsite() == null ? "" : dto_OmdbClassDetail.getWebsite(),
+                        dto_OmdbClassDetail.getRated() == null ? "" : dto_OmdbClassDetail.getRated(),
+                        dto_OmdbClassDetail.getCountry() == null ? "" : dto_OmdbClassDetail.getCountry(),
+                        dto_OmdbClassDetail.getMetascore() == null ? "" : dto_OmdbClassDetail.getMetascore(),
+                        dto_OmdbClassDetail.getImdbVotes() == null ? "" : dto_OmdbClassDetail.getImdbVotes(),
+                        dto_OmdbClassDetail.getType() == null ? "" : dto_OmdbClassDetail.getType(),
+                        dto_OmdbClassDetail.getDVD() == null ? "" : dto_OmdbClassDetail.getDVD(),
+                        dto_OmdbClassDetail.getBoxOffice() == null ? "" : dto_OmdbClassDetail.getBoxOffice());
+            }
+        });
+    }
+    private void insert(String Title
+                        , String ImdbId
+                        , String Year
+                        , String Poster
+                        , String Genre
+                        , String Runtime
+                        , String Actors
+                        , String ImdbRating
+                        , String Released
+                        , String Awards
+                        , String Production
+                        , String Director
+                        , String Writer
+                        , String Language
+                        , String Website
+                        , String Rated
+                        , String Country
+                        , String Metascore
+                        , String ImdbVotes
+                        , String Type
+                        , String DVD
+                        , String BoxOffice) {
+        String INSERT_OmdbInformation_QUERY = "INSERT INTO " + TABLE_NAME + "(Title,ImdbId,Year,Poster,Genre,Runtime,Actors,ImdbRating,Released,Awards,Production,Director,Writer,Language,Website,Rated,Country,Metascore,ImdbVotes,Type,DVD,BoxOffice)" +
                 "VALUES("
-                + "'" + Title + "'" + "," + "'" + ImdbId + "'" + ","+ "'" + Year + "'" + ","+ "'" + Poster + "'" +  ")";
+                            + "'" + Title + "'" + "," +
+                            "'" + ImdbId + "'" + ","+
+                            "'" + Year + "'" + ","+
+                            "'" + Poster + "'" + ","+
+                            "'" + Genre + "'" + ","+
+                            "'" + Runtime + "'" + ","+
+                            "'" + Actors + "'" + ","+
+                            "'" + ImdbRating + "'" + ","+
+                            "'" + Released + "'" + ","+
+                            "'" + Awards + "'" + ","+
+                            "'" + Production + "'" + ","+
+                            "'" + Director + "'" + ","+
+                            "'" + Writer + "'" + ","+
+                            "'" + Language + "'" + ","+
+                            "'" + Website + "'" + ","+
+                            "'" + Rated + "'" + ","+
+                            "'" + Country + "'" + ","+
+                            "'" + Metascore + "'" + ","+
+                            "'" + ImdbVotes + "'"+ ","+
+                            "'" + Type + "'" + ","+
+                            "'" + DVD + "'" + ","+
+                            "'" + BoxOffice + "'" +
+                        ")";
         SQLiteDatabase db = this.getWritableDatabase();
         db.execSQL(INSERT_OmdbInformation_QUERY);
         db.close();
@@ -55,7 +169,7 @@ public class OmdbRepository extends SQLiteOpenHelper {
 
     List<OmdbDetailClass> getAllOmdbInformation() {
 
-        String GET_ALL_OmdbInformation_QUERY = "SELECT Title,ImdbId,Year,Poster FROM " + TABLE_NAME;
+        String GET_ALL_OmdbInformation_QUERY = "SELECT Title,ImdbId,Year,Poster,Genre,Runtime,Actors,ImdbRating,Released,Awards,Production,Director,Writer,Language,Website,Rated,Country,Metascore,ImdbVotes,Type,DVD,BoxOffice FROM " + TABLE_NAME;
         ArrayList<OmdbDetailClass> OmdbDetailClassList = new ArrayList<>();
         OmdbDetailClass omdbDetailClass = new OmdbDetailClass();
 
@@ -69,6 +183,24 @@ public class OmdbRepository extends SQLiteOpenHelper {
             omdbDetailClass.setImdbID(cursor.getString(1));
             omdbDetailClass.setYear(cursor.getString(2));
             omdbDetailClass.setPoster(cursor.getString(3));
+            omdbDetailClass.setGenre(cursor.getString(4));
+            omdbDetailClass.setRuntime(cursor.getString(5));
+            omdbDetailClass.setActors(cursor.getString(6));
+            omdbDetailClass.setImdbRating(cursor.getString(7));
+            omdbDetailClass.setReleased(cursor.getString(8));
+            omdbDetailClass.setAwards(cursor.getString(9));
+            omdbDetailClass.setProduction(cursor.getString(10));
+            omdbDetailClass.setDirector(cursor.getString(11));
+            omdbDetailClass.setWriter(cursor.getString(12));
+            omdbDetailClass.setLanguage(cursor.getString(13));
+            omdbDetailClass.setWebsite(cursor.getString(14));
+            omdbDetailClass.setRated(cursor.getString(15));
+            omdbDetailClass.setCountry(cursor.getString(16));
+            omdbDetailClass.setMetascore(cursor.getString(17));
+            omdbDetailClass.setImdbVotes(cursor.getString(18));
+            omdbDetailClass.setType(cursor.getString(19));
+            omdbDetailClass.setDVD(cursor.getString(20));
+            omdbDetailClass.setBoxOffice(cursor.getString(21));
 
             OmdbDetailClassList.add(omdbDetailClass);
         }
@@ -123,7 +255,7 @@ public class OmdbRepository extends SQLiteOpenHelper {
     OmdbDetailClass GetRowOmdbInformation(String ImdbId)
     {
 
-        String GET_OmdbInformation_QUERY = "SELECT Title,ImdbId,Year,Poster FROM " + TABLE_NAME+ " Where ImdbId="+ "'" + ImdbId + "'";
+        String GET_OmdbInformation_QUERY = "SELECT Title,ImdbId,Year,Poster,Genre,Runtime,Actors,ImdbRating,Released,Awards,Production,Director,Writer,Language,Website,Rated,Country,Metascore,ImdbVotes,Type,DVD,BoxOffice FROM " + TABLE_NAME+ " Where ImdbId="+ "'" + ImdbId + "'";
         OmdbDetailClass omdbDetailClass = new OmdbDetailClass();
 
         SQLiteDatabase db = this.getReadableDatabase();
@@ -132,12 +264,28 @@ public class OmdbRepository extends SQLiteOpenHelper {
         while (cursor.moveToNext()) {
             if (ImdbId.equals(cursor.getString(1)))
             {
-
-                    omdbDetailClass.setTitle(cursor.getString(0));
-                    omdbDetailClass.setImdbID(cursor.getString(1));
-                    omdbDetailClass.setYear(cursor.getString(2));
-                    omdbDetailClass.setPoster(cursor.getString(3));
-
+                omdbDetailClass.setTitle(cursor.getString(0));
+                omdbDetailClass.setImdbID(cursor.getString(1));
+                omdbDetailClass.setYear(cursor.getString(2));
+                omdbDetailClass.setPoster(cursor.getString(3));
+                omdbDetailClass.setGenre(cursor.getString(4));
+                omdbDetailClass.setRuntime(cursor.getString(5));
+                omdbDetailClass.setActors(cursor.getString(6));
+                omdbDetailClass.setImdbRating(cursor.getString(7));
+                omdbDetailClass.setReleased(cursor.getString(8));
+                omdbDetailClass.setAwards(cursor.getString(9));
+                omdbDetailClass.setProduction(cursor.getString(10));
+                omdbDetailClass.setDirector(cursor.getString(11));
+                omdbDetailClass.setWriter(cursor.getString(12));
+                omdbDetailClass.setLanguage(cursor.getString(13));
+                omdbDetailClass.setWebsite(cursor.getString(14));
+                omdbDetailClass.setRated(cursor.getString(15));
+                omdbDetailClass.setCountry(cursor.getString(16));
+                omdbDetailClass.setMetascore(cursor.getString(17));
+                omdbDetailClass.setImdbVotes(cursor.getString(18));
+                omdbDetailClass.setType(cursor.getString(19));
+                omdbDetailClass.setDVD(cursor.getString(20));
+                omdbDetailClass.setBoxOffice(cursor.getString(21));
             }
         }
         db.close();

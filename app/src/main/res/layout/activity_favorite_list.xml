@@ -7,6 +7,16 @@
     android:orientation="vertical"
     tools:context=".FavoriteList">
 
+    <ir.javafundamental.android.finalprojectandroid.CustomTextView
+        android:layout_width="match_parent"
+        android:layout_height="wrap_content"
+        style="@style/MyTextView"
+        android:textSize="32sp"
+        android:gravity="center"
+        android:layout_margin="10dp"
+        android:text="@string/my_favorite_list"
+        android:id="@+id/txt_myfavoritelist"/>
+
     <androidx.recyclerview.widget.RecyclerView
         android:id="@+id/mainRecycleView"
         android:layout_width="match_parent"
